@@ -60,23 +60,28 @@ export async function clearAuthCookie() {
 }
 
 export async function getAuthenticatedUser() {
-  const token = await getTokenFromCookies();
-  if (!token) return null;
+  try {
+    const token = await getTokenFromCookies();
+    if (!token) return null;
 
-  const payload = await verifyToken(token);
-  if (!payload) return null;
+    const payload = await verifyToken(token);
+    if (!payload) return null;
 
-  const { db } = await import('@/lib/db');
-  const result = await db.execute({
-    sql: 'SELECT id, email, name FROM User WHERE id = ?',
-    args: [payload.userId],
-  });
+    const { db } = await import('@/lib/db');
+    const result = await db.execute({
+      sql: 'SELECT id, email, name FROM User WHERE id = ?',
+      args: [payload.userId],
+    });
 
-  if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) return null;
 
-  return {
-    id: result.rows[0].id as string,
-    email: result.rows[0].email as string,
-    name: result.rows[0].name as string,
-  };
+    return {
+      id: result.rows[0].id as string,
+      email: result.rows[0].email as string,
+      name: result.rows[0].name as string,
+    };
+  } catch (error) {
+    console.error('getAuthenticatedUser error:', error);
+    return null;
+  }
 }

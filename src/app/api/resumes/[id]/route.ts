@@ -43,10 +43,11 @@ export async function GET(
       { success: true, data: { ...row, data: JSON.parse(row.data as string) } },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Get resume error:', error);
+    const message = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: message },
       { status: 500 }
     );
   }
@@ -129,10 +130,11 @@ export async function PUT(
       { success: true, data: { ...row, data: JSON.parse(row.data as string) } },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Update resume error:', error);
+    const message = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: message },
       { status: 500 }
     );
   }
@@ -182,10 +184,11 @@ export async function DELETE(
       { success: true, data: { message: 'Resume deleted successfully' } },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Delete resume error:', error);
+    const message = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: message },
       { status: 500 }
     );
   }

@@ -9,11 +9,14 @@ function createDbClient(): Client {
   const authToken = process.env.TURSO_AUTH_TOKEN
 
   if (url && authToken) {
+    console.log('[DB] Connecting to Turso cloud database:', url)
     return createClient({ url, authToken })
   }
 
   // Fallback to local SQLite for development
-  return createClient({ url: process.env.DATABASE_URL || 'file:./db/custom.db' })
+  const localUrl = process.env.DATABASE_URL || 'file:./db/custom.db'
+  console.log('[DB] Connecting to local SQLite:', localUrl)
+  return createClient({ url: localUrl })
 }
 
 export const db = globalForDb.tursoClient ?? createDbClient()
