@@ -1,33 +1,21 @@
-import { PrismaClient } from '@prisma/client'
-import { PrismaLibSql } from '@prisma/adapter-libsql'
+import { createClient, type Client } from '@libsql/client'
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
+const globalForDb = globalThis as unknown as {
+  tursoClient: Client | undefined
 }
 
-function createPrismaClient() {
-  const tursoUrl = process.env.TURSO_DATABASE_URL
-  const tursoAuthToken = process.env.TURSO_AUTH_TOKEN
+function createDbClient(): Client {
+  const url = process.env.TURSO_DATABASE_URL
+  const authToken = process.env.TURSO_AUTH_TOKEN
 
-  if (tursoUrl && tursoAuthToken) {
-    // Use Turso cloud database
-    const adapter = new PrismaLibSql({
-      url: tursoUrl,
-      authToken: tursoAuthToken,
-    })
-
-    return new PrismaClient({
-      adapter,
-      log: process.env.NODE_ENV === 'development' ? ['query'] : [],
-    })
+  if (url && authToken) {
+    return createClient({ url, authToken })
   }
 
-  // Fallback to local SQLite (for development)
-  return new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query'] : [],
-  })
+  // Fallback to local SQLite for development
+  return createClient({ url: process.env.DATABASE_URL || 'file:./db/custom.db' })
 }
 
-export const db = globalForPrisma.prisma ?? createPrismaClient()
+export const db = globalForDb.tursoClient ?? createDbClient()
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db
+if (process.env.NODE_ENV !== 'production') globalForDb.tursoClient = db

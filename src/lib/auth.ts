@@ -67,10 +67,16 @@ export async function getAuthenticatedUser() {
   if (!payload) return null;
 
   const { db } = await import('@/lib/db');
-  const user = await db.user.findUnique({
-    where: { id: payload.userId },
-    select: { id: true, email: true, name: true },
+  const result = await db.execute({
+    sql: 'SELECT id, email, name FROM User WHERE id = ?',
+    args: [payload.userId],
   });
 
-  return user;
+  if (result.rows.length === 0) return null;
+
+  return {
+    id: result.rows[0].id as string,
+    email: result.rows[0].email as string,
+    name: result.rows[0].name as string,
+  };
 }

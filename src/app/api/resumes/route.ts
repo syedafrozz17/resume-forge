@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { cuid } from '@/lib/utils';
 
 export async function GET() {
   try {
@@ -13,27 +14,22 @@ export async function GET() {
       );
     }
 
-    const resumes = await db.resume.findMany({
-      where: { userId: user.id },
-      orderBy: { updatedAt: 'desc' },
-      select: {
-        id: true,
-        title: true,
-        data: true,
-        userId: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+    const result = await db.execute({
+      sql: 'SELECT id, title, data, userId, createdAt, updatedAt FROM Resume WHERE userId = ? ORDER BY updatedAt DESC',
+      args: [user.id],
     });
 
-    // Parse data JSON strings for each resume
-    const parsedResumes = resumes.map((resume) => ({
-      ...resume,
-      data: JSON.parse(resume.data),
+    const resumes = result.rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      data: JSON.parse(row.data as string),
+      userId: row.userId,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     }));
 
     return NextResponse.json(
-      { success: true, data: parsedResumes },
+      { success: true, data: resumes },
       { status: 200 }
     );
   } catch (error) {
@@ -69,34 +65,27 @@ export async function POST(request: NextRequest) {
     // If sourceId is provided, copy data from that resume
     let resumeData = data;
     if (sourceId && !data) {
-      const sourceResume = await db.resume.findUnique({
-        where: { id: sourceId },
+      const source = await db.execute({
+        sql: 'SELECT data, userId FROM Resume WHERE id = ?',
+        args: [sourceId],
       });
-      if (sourceResume && sourceResume.userId === user.id) {
-        resumeData = sourceResume.data;
+      if (source.rows.length > 0 && source.rows[0].userId === user.id) {
+        resumeData = source.rows[0].data;
       }
     }
 
-    const resume = await db.resume.create({
-      data: {
-        title,
-        data: typeof resumeData === 'string' ? resumeData : JSON.stringify(resumeData || {}),
-        userId: user.id,
-      },
-      select: {
-        id: true,
-        title: true,
-        data: true,
-        userId: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+    const id = cuid();
+    const dataStr = typeof resumeData === 'string' ? resumeData : JSON.stringify(resumeData || {});
+
+    await db.execute({
+      sql: 'INSERT INTO Resume (id, title, data, userId, createdAt, updatedAt) VALUES (?, ?, ?, ?, datetime(\'now\'), datetime(\'now\'))',
+      args: [id, title, dataStr, user.id],
     });
 
     return NextResponse.json(
       {
         success: true,
-        data: { ...resume, data: JSON.parse(resume.data) },
+        data: { id, title, data: JSON.parse(dataStr), userId: user.id },
       },
       { status: 201 }
     );

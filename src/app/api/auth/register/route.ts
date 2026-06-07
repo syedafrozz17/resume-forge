@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { hashPassword, createToken, setAuthCookie } from '@/lib/auth';
+import { cuid } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { name, email, password } = body;
 
-    // Validate fields
     if (!name || !email || !password) {
       return NextResponse.json(
         { success: false, error: 'Name, email, and password are required' },
@@ -23,11 +23,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Check email uniqueness
-    const existingUser = await db.user.findUnique({
-      where: { email },
+    const existing = await db.execute({
+      sql: 'SELECT id FROM User WHERE email = ?',
+      args: [email],
     });
 
-    if (existingUser) {
+    if (existing.rows.length > 0) {
       return NextResponse.json(
         { success: false, error: 'Email already registered' },
         { status: 400 }
@@ -36,24 +37,18 @@ export async function POST(request: NextRequest) {
 
     // Hash password and create user
     const hashedPassword = await hashPassword(password);
-    const user = await db.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
-      select: { id: true, email: true, name: true },
+    const id = cuid();
+
+    await db.execute({
+      sql: 'INSERT INTO User (id, email, name, password, createdAt, updatedAt) VALUES (?, ?, ?, ?, datetime(\'now\'), datetime(\'now\'))',
+      args: [id, email, name, hashedPassword],
     });
 
-    // Create JWT token and set cookie
-    const token = await createToken({
-      userId: user.id,
-      email: user.email,
-    });
+    const token = await createToken({ userId: id, email });
     await setAuthCookie(token);
 
     return NextResponse.json(
-      { success: true, data: user },
+      { success: true, data: { id, email, name } },
       { status: 201 }
     );
   } catch (error) {

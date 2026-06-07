@@ -7,7 +7,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, password } = body;
 
-    // Validate fields
     if (!email || !password) {
       return NextResponse.json(
         { success: false, error: 'Email and password are required' },
@@ -16,19 +15,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user by email
-    const user = await db.user.findUnique({
-      where: { email },
+    const result = await db.execute({
+      sql: 'SELECT id, email, name, password FROM User WHERE email = ?',
+      args: [email],
     });
 
-    if (!user) {
+    if (result.rows.length === 0) {
       return NextResponse.json(
         { success: false, error: 'Invalid email or password' },
         { status: 401 }
       );
     }
 
+    const user = result.rows[0];
+
     // Verify password
-    const isValid = await verifyPassword(password, user.password);
+    const isValid = await verifyPassword(password, user.password as string);
     if (!isValid) {
       return NextResponse.json(
         { success: false, error: 'Invalid email or password' },
@@ -38,8 +40,8 @@ export async function POST(request: NextRequest) {
 
     // Create JWT token and set cookie
     const token = await createToken({
-      userId: user.id,
-      email: user.email,
+      userId: user.id as string,
+      email: user.email as string,
     });
     await setAuthCookie(token);
 

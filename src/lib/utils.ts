@@ -4,3 +4,11 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+// Generate a CUID-like ID (compatible with Prisma's @default(cuid()))
+export function cuid(): string {
+  const timestamp = Date.now().toString(36)
+  const random = Math.random().toString(36).substring(2, 10)
+  const random2 = Math.random().toString(36).substring(2, 10)
+  return `c${timestamp}${random}${random2}`
+}

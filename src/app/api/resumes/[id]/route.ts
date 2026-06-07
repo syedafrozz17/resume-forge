@@ -18,26 +18,21 @@ export async function GET(
 
     const { id } = await params;
 
-    const resume = await db.resume.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        title: true,
-        data: true,
-        userId: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+    const result = await db.execute({
+      sql: 'SELECT id, title, data, userId, createdAt, updatedAt FROM Resume WHERE id = ?',
+      args: [id],
     });
 
-    if (!resume) {
+    if (result.rows.length === 0) {
       return NextResponse.json(
         { success: false, error: 'Resume not found' },
         { status: 404 }
       );
     }
 
-    if (resume.userId !== user.id) {
+    const row = result.rows[0];
+
+    if (row.userId !== user.id) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -45,7 +40,7 @@ export async function GET(
     }
 
     return NextResponse.json(
-      { success: true, data: { ...resume, data: JSON.parse(resume.data) } },
+      { success: true, data: { ...row, data: JSON.parse(row.data as string) } },
       { status: 200 }
     );
   } catch (error) {
@@ -73,18 +68,19 @@ export async function PUT(
 
     const { id } = await params;
 
-    const existingResume = await db.resume.findUnique({
-      where: { id },
+    const existing = await db.execute({
+      sql: 'SELECT id, userId FROM Resume WHERE id = ?',
+      args: [id],
     });
 
-    if (!existingResume) {
+    if (existing.rows.length === 0) {
       return NextResponse.json(
         { success: false, error: 'Resume not found' },
         { status: 404 }
       );
     }
 
-    if (existingResume.userId !== user.id) {
+    if (existing.rows[0].userId !== user.id) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -94,27 +90,43 @@ export async function PUT(
     const body = await request.json();
     const { title, data } = body;
 
-    const updateData: { title?: string; data?: string } = {};
-    if (title !== undefined) updateData.title = title;
+    // Build update query dynamically
+    const updates: string[] = [];
+    const args: (string | null)[] = [];
+
+    if (title !== undefined) {
+      updates.push('title = ?');
+      args.push(title);
+    }
     if (data !== undefined) {
-      updateData.data = typeof data === 'string' ? data : JSON.stringify(data);
+      updates.push('data = ?');
+      args.push(typeof data === 'string' ? data : JSON.stringify(data));
     }
 
-    const resume = await db.resume.update({
-      where: { id },
-      data: updateData,
-      select: {
-        id: true,
-        title: true,
-        data: true,
-        userId: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+    if (updates.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'No fields to update' },
+        { status: 400 }
+      );
+    }
+
+    updates.push("updatedAt = datetime('now')");
+    args.push(id);
+
+    await db.execute({
+      sql: `UPDATE Resume SET ${updates.join(', ')} WHERE id = ?`,
+      args,
     });
 
+    // Fetch updated resume
+    const updated = await db.execute({
+      sql: 'SELECT id, title, data, userId, createdAt, updatedAt FROM Resume WHERE id = ?',
+      args: [id],
+    });
+
+    const row = updated.rows[0];
     return NextResponse.json(
-      { success: true, data: { ...resume, data: JSON.parse(resume.data) } },
+      { success: true, data: { ...row, data: JSON.parse(row.data as string) } },
       { status: 200 }
     );
   } catch (error) {
@@ -142,26 +154,28 @@ export async function DELETE(
 
     const { id } = await params;
 
-    const existingResume = await db.resume.findUnique({
-      where: { id },
+    const existing = await db.execute({
+      sql: 'SELECT id, userId FROM Resume WHERE id = ?',
+      args: [id],
     });
 
-    if (!existingResume) {
+    if (existing.rows.length === 0) {
       return NextResponse.json(
         { success: false, error: 'Resume not found' },
         { status: 404 }
       );
     }
 
-    if (existingResume.userId !== user.id) {
+    if (existing.rows[0].userId !== user.id) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    await db.resume.delete({
-      where: { id },
+    await db.execute({
+      sql: 'DELETE FROM Resume WHERE id = ?',
+      args: [id],
     });
 
     return NextResponse.json(
