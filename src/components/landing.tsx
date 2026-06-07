@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import {
   FileText, Zap, Shield, Download, ChevronRight, Sparkles, PenTool,
-  CheckCircle2, Star, Users, ArrowRight, Eye, Save, LayoutTemplate
+  CheckCircle2, Users, ArrowRight, Eye, Save, LayoutTemplate
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -76,33 +76,7 @@ const steps = [
   },
 ];
 
-const testimonials = [
-  {
-    name: 'Priya S.',
-    role: 'Software Engineer',
-    text: 'Got my dream job after using ResumeForge. The ATS-friendly format really works!',
-    stars: 5,
-  },
-  {
-    name: 'Marcus J.',
-    role: 'Product Manager',
-    text: 'Clean, fast, and professional. Built my resume in under 15 minutes.',
-    stars: 5,
-  },
-  {
-    name: 'Aisha K.',
-    role: 'Data Analyst',
-    text: 'The real-time preview is a game changer. I could see exactly what recruiters would see.',
-    stars: 5,
-  },
-];
 
-const stats = [
-  { value: '10K+', label: 'Resumes Created' },
-  { value: '95%', label: 'ATS Pass Rate' },
-  { value: '4.9', label: 'User Rating' },
-  { value: '< 15min', label: 'Avg. Build Time' },
-];
 
 // Mini resume preview component for the hero
 function MiniResumePreview() {
@@ -285,20 +259,6 @@ export function Landing() {
         </div>
       </section>
 
-      {/* Stats Bar */}
-      <section className="bg-white border-y border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-emerald-600">{stat.value}</div>
-                <div className="text-sm text-gray-500 mt-1">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Features Section */}
       <section className="py-16 sm:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -402,64 +362,6 @@ export function Landing() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-16 sm:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-80px' }}
-            variants={stagger}
-            className="text-center mb-12"
-          >
-            <motion.h2
-              variants={fadeInUp}
-              className="text-3xl sm:text-4xl font-bold text-gray-900"
-            >
-              Loved by Professionals
-            </motion.h2>
-            <motion.p
-              variants={fadeInUp}
-              className="mt-3 text-lg text-gray-600 max-w-2xl mx-auto"
-            >
-              See what our users have to say about ResumeForge.
-            </motion.p>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-80px' }}
-            variants={stagger}
-            className="grid grid-cols-1 md:grid-cols-3 gap-5"
-          >
-            {testimonials.map((testimonial) => (
-              <motion.div key={testimonial.name} variants={fadeInUp}>
-                <Card className="h-full border border-gray-100 shadow-sm rounded-xl">
-                  <CardContent className="p-6">
-                    <div className="flex gap-0.5 mb-3">
-                      {Array.from({ length: testimonial.stars }).map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-                    <p className="text-gray-600 text-sm leading-relaxed mb-4">&ldquo;{testimonial.text}&rdquo;</p>
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm">
-                        {testimonial.name.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-gray-900">{testimonial.name}</div>
-                        <div className="text-xs text-gray-500">{testimonial.role}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-16 sm:py-24 bg-gradient-to-r from-emerald-600 to-teal-600 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50" />
@@ -480,7 +382,7 @@ export function Landing() {
               variants={fadeInUp}
               className="mt-4 text-lg text-emerald-100 max-w-2xl mx-auto"
             >
-              Join thousands of professionals who have created stunning resumes with ResumeForge.
+              Create a professional, ATS-friendly resume and land your dream job.
             </motion.p>
             <motion.div variants={fadeInUp} className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Button

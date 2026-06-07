@@ -105,7 +105,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="rounded-lg"
+                  className="rounded-lg bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                 />
               </div>
             )}
@@ -119,7 +119,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="rounded-lg"
+                className="rounded-lg bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
               />
             </div>
 
@@ -132,7 +132,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="rounded-lg"
+                className="rounded-lg bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
               />
             </div>
 
@@ -146,7 +146,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="rounded-lg"
+                  className="rounded-lg bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                 />
               </div>
             )}
