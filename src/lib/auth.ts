@@ -8,7 +8,7 @@ const JWT_SECRET = new TextEncoder().encode(
 const TOKEN_NAME = 'resume-builder-token';
 
 export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 12);
+  return bcrypt.hash(password, 10);
 }
 
 export async function verifyPassword(
